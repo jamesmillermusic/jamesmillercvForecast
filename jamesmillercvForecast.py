@@ -5,6 +5,8 @@ import itertools
 import warnings
 from statsmodels.tsa.statespace.sarimax import SARIMAX
 import matplotlib.pyplot as plt
+import json
+from datetime import datetime
 
 warnings.filterwarnings("ignore")
 
@@ -153,7 +155,7 @@ plt.show()
 
 
 # =========================
-# 9. Prepare output row
+# 9. Prepare output row (JSON for GitHub Actions)
 # =========================
 timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
@@ -164,4 +166,4 @@ row = {
 for name, values in results_dict.items():
     row[name] = round(values["Forecast"], 1)
 
-print(row)
+print(json.dumps(row))
