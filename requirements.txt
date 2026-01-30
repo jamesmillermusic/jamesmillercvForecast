@@ -2,3 +2,4 @@ pandas
 statsmodels
 matplotlib
 numpy
+gspread
