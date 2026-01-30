@@ -3,3 +3,4 @@ statsmodels
 matplotlib
 numpy
 gspread
+google-auth
