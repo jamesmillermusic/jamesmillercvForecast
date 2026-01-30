@@ -174,20 +174,20 @@ print(json.dumps(row))
 # =========================
 # 10. Write to Google Sheets
 # =========================
-SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
-CREDS = json.loads(open("creds.json").read())
-SPREADSHEET_ID = "12XxYn4zgcHVMJfme0rvQRA4eyJe9y005nc8Jx2DM9f8"
+#SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
+#CREDS = json.loads(open("creds.json").read())
+#SPREADSHEET_ID = "12XxYn4zgcHVMJfme0rvQRA4eyJe9y005nc8Jx2DM9f8"
 
-creds = Credentials.from_service_account_info(CREDS, scopes=SCOPES)
-client = gspread.authorize(creds)
+#creds = Credentials.from_service_account_info(CREDS, scopes=SCOPES)
+#client = gspread.authorize(creds)
 
-sheet = client.open_by_key(SPREADSHEET_ID).worksheet("Forecast Log")
+#sheet = client.open_by_key(SPREADSHEET_ID).worksheet("Forecast Log")
 
-with open("output.json") as f:
-    row = json.loads(f.read())
+#with open("output.json") as f:
+#    row = json.loads(f.read())
 
 # Order must match headers
-headers = sheet.row_values(1)
-values = [row.get(h, "") for h in headers]
+#headers = sheet.row_values(1)
+#values = [row.get(h, "") for h in headers]
 
-sheet.append_row(values, value_input_option="USER_ENTERED")
+#sheet.append_row(values, value_input_option="USER_ENTERED")
