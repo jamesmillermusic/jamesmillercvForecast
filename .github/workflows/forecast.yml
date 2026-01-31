@@ -1,34 +1,33 @@
-name: Run CV Forecast
-
-on:
-  workflow_dispatch:        # manual button click
-  schedule:
-    - cron: "0 20 * * *"    # daily run (20:00 UTC)
-
-jobs:
-  forecast:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-
-      - name: Install dependencies
-        run: |
-          pip install -r requirements.txt
-
-      - name: Run forecast
-        run: |
-          python jamesmillercvForecast.py > output.json
-
-      - name: Append results to Google Sheets
-        env:
-          GOOGLE_CREDS: ${{ secrets.GOOGLE_CREDS }}
-        run: |
-          python append_to_sheets.py
-
+#name: Run CV Forecast
+#
+#on:
+#  workflow_dispatch:        # manual button click
+#  schedule:
+#    - cron: "0 20 * * *"    # daily run (20:00 UTC)
+#
+#jobs:
+#  forecast:
+#    runs-on: ubuntu-latest
+#
+#    steps:
+#      - name: Checkout repo
+#        uses: actions/checkout@v4
+#
+#      - name: Set up Python
+#        uses: actions/setup-python@v5
+#        with:
+#          python-version: "3.11"
+#
+#      - name: Install dependencies
+#        run: |
+#          pip install -r requirements.txt
+#
+#      - name: Run forecast
+#        run: |
+#          python jamesmillercvForecast.py > output.json
+#
+#      - name: Append results to Google Sheets
+#        env:
+#          GOOGLE_CREDS: ${{ secrets.GOOGLE_CREDS }}
+#        run: |
+#          python append_to_sheets.py
