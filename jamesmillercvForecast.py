@@ -5,10 +5,6 @@ import itertools
 import warnings
 from statsmodels.tsa.statespace.sarimax import SARIMAX
 import matplotlib.pyplot as plt
-import json
-from datetime import datetime
-import gspread
-from google.oauth2.service_account import Credentials
 
 warnings.filterwarnings("ignore")
 
@@ -155,39 +151,72 @@ residuals.plot(title="Residuals")
 plt.show()
 
 
+# =========================
+# 9. Daily + cumulative forecast for full 2026
+# =========================
+
+forecast_end = pd.Timestamp(current_year, 12, 31)
+last_observed = df.index.max()
+
+# Days remaining in year
+n_days = (forecast_end - last_observed).days
+
+# Generate forecast
+forecast_2026 = results.get_forecast(steps=n_days)
+
+# Daily forecasts (bias corrected)
+mean_daily = forecast_2026.predicted_mean - bias_daily
+conf_int = forecast_2026.conf_int()
+conf_lower = conf_int.iloc[:, 0] - bias_daily
+conf_upper = conf_int.iloc[:, 1] - bias_daily
+
+
+# Date index
+forecast_index = pd.date_range(
+    start=last_observed + pd.Timedelta(days=1),
+    periods=n_days,
+    freq="D"
+)
+
+# Actual cumulative views so far in 2026
+actual_cum_2026 = df.loc[df.index.year == current_year, "Actual Views"].sum()
+
+# Build dataframe
+forecast_df = pd.DataFrame({
+    "Daily Forecast": mean_daily.values,
+    "Lower CI Daily": conf_lower.values,
+    "Upper CI Daily": conf_upper.values
+}, index=forecast_index)
+
+# Cumulative projections
+forecast_df["Cumulative Forecast"] = actual_cum_2026 + forecast_df["Daily Forecast"].cumsum()
+forecast_df["Lower CI Cumulative"] = actual_cum_2026 + forecast_df["Lower CI Daily"].cumsum()
+forecast_df["Upper CI Cumulative"] = actual_cum_2026 + forecast_df["Upper CI Daily"].cumsum()
 
 # =========================
-# 9. Prepare output row (JSON for GitHub Actions)
+# 10. Plot cumulative projected views
 # =========================
-timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-row = {
-    "Timestamp": timestamp
-}
+plt.figure(figsize=(14, 6))
 
-for name, values in results_dict.items():
-    row[name] = round(values["Forecast"], 1)
+plt.plot(
+    forecast_df.index,
+    forecast_df["Cumulative Forecast"],
+    label="Projected Cumulative Views",
+    linewidth=2
+)
 
-print(json.dumps(row))
+plt.fill_between(
+    forecast_df.index,
+    forecast_df["Lower CI Cumulative"],
+    forecast_df["Upper CI Cumulative"],
+    alpha=0.2,
+    label="95% Confidence Interval"
+)
 
-
-# =========================
-# 10. Write to Google Sheets
-# =========================
-#SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
-#CREDS = json.loads(open("creds.json").read())
-#SPREADSHEET_ID = "12XxYn4zgcHVMJfme0rvQRA4eyJe9y005nc8Jx2DM9f8"
-
-#creds = Credentials.from_service_account_info(CREDS, scopes=SCOPES)
-#client = gspread.authorize(creds)
-
-#sheet = client.open_by_key(SPREADSHEET_ID).worksheet("Forecast Log")
-
-#with open("output.json") as f:
-#    row = json.loads(f.read())
-
-# Order must match headers
-#headers = sheet.row_values(1)
-#values = [row.get(h, "") for h in headers]
-
-#sheet.append_row(values, value_input_option="USER_ENTERED")
+plt.title("Projected Cumulative Website Views – 2026")
+plt.xlabel("Date")
+plt.ylabel("Total Views")
+plt.legend()
+plt.tight_layout()
+plt.show()
